@@ -14,27 +14,38 @@ $this->title = 'Cryptocoin online';
 
         <p class="lead">
             Enter your address, invest and get BTC!
+
         <div class="row">
             <div class="col-lg-4"></div>
             <div class="col-lg-4">
-                <?php $form = \yii\widgets\ActiveForm::begin(
-                    [
-                        'options' => [
-                            'class' => 'form',
-                        ],
-                        'fieldConfig' => [
-                            'template' => '{input} {error}',
-                        ],
-                    ]
-                );
-                ?>
-                <?= $form->field($depositForm, 'pay_address')->textInput(
-                    ['class' => 'form-control', 'placeholder' => 'Enter address']
-                ) ?>
 
-                <input type="submit" class="btn btn-lg btn-success" value="Double coins">
 
-                <?php \yii\widgets\ActiveForm::end(); ?>
+                <?php if (Yii::$app->session->hasFlash('result')) { ?>
+
+                    <?=Yii::$app->session->getFlash('result') ?>
+
+                <?php } else { ?>
+
+                    <?php $form = \yii\widgets\ActiveForm::begin(
+                        [
+                            'options' => [
+                                'class' => 'form',
+                            ],
+                            'fieldConfig' => [
+                                'template' => '{input} {error}',
+                            ],
+                        ]
+                    );
+                    ?>
+                    <?= $form->field($depositForm, 'pay_address')->textInput(
+                        ['class' => 'form-control', 'placeholder' => 'Enter address']
+                    ) ?>
+
+                    <input type="submit" class="btn btn-lg btn-success" value="Double coins">
+                    <?php \yii\widgets\ActiveForm::end(); ?>
+
+                <?php } ?>
+
 
             </div>
 

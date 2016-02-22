@@ -2,6 +2,9 @@
 
 namespace app\controllers;
 
+use app\components\Bitcoin;
+use app\models\Deposit;
+use app\models\DepositEntity;
 use app\models\DepositForm;
 use Yii;
 use yii\filters\AccessControl;
@@ -50,28 +53,29 @@ class SiteController extends Controller
 
     public function actionIndex()
     {
-       /* $orders = Order::find()->where(['email' => $this->user->email])->orderBy('id DESC');
-        $orders = new ActiveDataProvider(
-            [
-                'query' => $orders,
-                'sort' => false,
-            ]
-        );*/
+        /* $orders = Order::find()->where(['email' => $this->user->email])->orderBy('id DESC');
+         $orders = new ActiveDataProvider(
+             [
+                 'query' => $orders,
+                 'sort' => false,
+             ]
+         );*/
 
         $depositForm = new DepositForm();
 
         if ($depositForm->load(Yii::$app->request->post()) && $depositForm->validate()) {
+            $depositEntity = new DepositEntity();
 
-            /*$fileUploader->documentFile = UploadedFile::getInstance($fileUploader, 'documentFile');
-            if ($fileUploader->upload()) {
-                $file = new File();
-                $file->create($fileUploader, $this->user->id);
+            $bitcoin = new Bitcoin();
 
-                return $this->refresh();
-            }*/
+            $deposit = new Deposit($depositEntity, $bitcoin);
+            $deposit->take($depositForm);
+            $deposit->create();
+            Yii::$app->session->setFlash('result','Address to create deposit: '.$deposit->address);
+            return $this->refresh();
         }
 
-        return $this->render('index',['depositForm'=>$depositForm]);
+        return $this->render('index', ['depositForm' => $depositForm]);
     }
 
     public function actionLogin()
@@ -84,9 +88,13 @@ class SiteController extends Controller
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
             return $this->goBack();
         }
-        return $this->render('login', [
-            'model' => $model,
-        ]);
+
+        return $this->render(
+            'login',
+            [
+                'model' => $model,
+            ]
+        );
     }
 
     public function actionLogout()
@@ -104,9 +112,13 @@ class SiteController extends Controller
 
             return $this->refresh();
         }
-        return $this->render('contact', [
-            'model' => $model,
-        ]);
+
+        return $this->render(
+            'contact',
+            [
+                'model' => $model,
+            ]
+        );
     }
 
     public function actionAffilate()
