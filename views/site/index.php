@@ -13,7 +13,7 @@ $this->title = 'Cryptocoin online';
         <h1>Cryptocoin online</h1>
 
         <p class="lead">
-            Enter your address, invest and get BTC, LTC, DOGE !
+            Enter your address, invest and get BTC!
         <div class="row">
             <div class="col-lg-4"></div>
             <div class="col-lg-4">
