@@ -31,7 +31,7 @@ class DepositEntity extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['created_date','updated_date','amount','pay_amount','status'], 'integer'],
+            [['created_date','updated_date','amount','pay_amount','expire_date','status'], 'integer'],
             [['currency','address','pay_address'], 'string', 'max' => 100]
         ];
     }

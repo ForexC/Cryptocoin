@@ -18,6 +18,8 @@ class Deposit
 
     public $pay_address;
 
+    public $period;
+
     private $entity;
 
     private $payment;
@@ -37,16 +39,14 @@ class Deposit
     public function create()
     {
         $this->address = $this->payment->generateAddress();
-        return $this->save();
-    }
-
-    private function save()
-    {
         $this->entity->pay_address = $this->pay_address;
         $this->entity->address = $this->address;
         $this->entity->currency = $this->currency;
         $this->entity->created_date = time();
+        $this->entity->status = self::NOT_PAID;
+
         return $this->entity->save();
     }
+
 
 }
