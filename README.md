@@ -1,25 +1,18 @@
-Yii 2 Basic Project Template
+Cryptocoin deposits application
 ============================
 
-Yii 2 Basic Project Template is a skeleton [Yii 2](http://www.yiiframework.com/) application best for
-rapidly creating small projects.
-
-The template contains the basic features including user login/logout and a contact page.
-It includes all commonly used configurations that would allow you to focus on adding new
-features to your application.
-
-[![Latest Stable Version](https://poser.pugx.org/yiisoft/yii2-app-basic/v/stable.png)](https://packagist.org/packages/yiisoft/yii2-app-basic)
-[![Total Downloads](https://poser.pugx.org/yiisoft/yii2-app-basic/downloads.png)](https://packagist.org/packages/yiisoft/yii2-app-basic)
-[![Build Status](https://travis-ci.org/yiisoft/yii2-app-basic.svg?branch=master)](https://travis-ci.org/yiisoft/yii2-app-basic)
+With this application you can set up your own coin double deposit bitcoin system.
+Installation and integration are easy! This script supports blockchain.info API to receive and send bitcoins from users.
 
 DIRECTORY STRUCTURE
 -------------------
 
       assets/             contains assets definition
-      commands/           contains console commands (controllers)
+      components/         contains libraries to implement PaymentInterface
       config/             contains application configurations
       controllers/        contains Web controller classes
       mail/               contains view files for e-mails
+      migrations/         contains migrations to set up your database
       models/             contains model classes
       runtime/            contains files generated during runtime
       tests/              contains various tests for the basic application
@@ -38,46 +31,10 @@ The minimum requirement by this project template that your Web server supports P
 INSTALLATION
 ------------
 
-### Install from an Archive File
+### Install from git
 
-Extract the archive file downloaded from [yiiframework.com](http://www.yiiframework.com/download/) to
-a directory named `basic` that is directly under the Web root.
-
-Set cookie validation key in `config/web.php` file to some random secret string:
-
-```php
-'request' => [
-    // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-    'cookieValidationKey' => '<secret random string goes here>',
-],
-```
-
-You can then access the application through the following URL:
-
-~~~
-http://localhost/basic/web/
-~~~
-
-
-### Install via Composer
-
-If you do not have [Composer](http://getcomposer.org/), you may install it by following the instructions
-at [getcomposer.org](http://getcomposer.org/doc/00-intro.md#installation-nix).
-
-You can then install this project template using the following command:
-
-~~~
-php composer.phar global require "fxp/composer-asset-plugin:~1.1.1"
-php composer.phar create-project --prefer-dist --stability=dev yiisoft/yii2-app-basic basic
-~~~
-
-Now you should be able to access the application through the following URL, assuming `basic` is the directory
-directly under the Web root.
-
-~~~
-http://localhost/basic/web/
-~~~
-
+Take git clone of this repository, then you should configure your database and set your blockchain account data.
+Then you should run: `composer install`
 
 CONFIGURATION
 -------------
@@ -95,8 +52,23 @@ return [
     'charset' => 'utf8',
 ];
 ```
+Edit file `config/params.php` with real data, for example:
 
-**NOTES:**
-- Yii won't create the database for you, this has to be done manually before you can access it.
-- Check and edit the other files in the `config/` directory to customize your application as required.
-- Refer to the README in the `tests` directory for information specific to basic application tests.
+```php
+return [
+    'adminEmail' => 'admin@example.com',
+    'expireDepositPeriod' => 60 * 60 * 24 * 1, // Expire deposits period, add in seconds! 1 day: 60 * 60 * 24 * 1
+    'payPassword' => "qwerty", // Password to get from cron pay methods
+
+    'BTC_IPN_PASSWORD'=>'qwerty1234', // Your IPN password to use a params in notification urls
+    'BTC_GUID'=>'9b0e0bf9-28fd-43b7-b743-895f49c594f3', // GUID of blockchain, for example: 9b0e0bf9-28fd-43b7-b743-895f49c594f3
+    'BTC_PASSWORD'=>'myblockchainpassword', // Password of blockchain account
+    'BTC_SECOND_PASSWORD'=>'', // second password, don't use this param in this application
+
+];
+```
+
+**BLOCKCHAIN API:**
+- You should enable blockchain API in blockchain.info settings page.
+- You should add blockchain callback to script route /site/income?pass=myblockchainpassword in blockchain.info settings.
+- To run unit tests go to `tests` directory and run: `codecept run unit`.
