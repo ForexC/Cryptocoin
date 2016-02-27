@@ -26,6 +26,7 @@ class Deposit
 
     public $period;
 
+
     private $entity;
 
     private $payment;
@@ -69,6 +70,18 @@ class Deposit
         $this->entity->pay_amount  = $this->payAmount;
         $this->entity->expire_date = time() + $this->period;
         $this->entity->status = self::ACTIVE;
+        return $this->entity->save();
+    }
+
+    public function pay()
+    {
+        return $this->payment->send(['wallet'=>$this->pay_address,'amount'=>$this->payAmount]);
+    }
+
+    public function finish()
+    {
+        $this->entity->updated_date = time();
+        $this->entity->status = self::FINISHED;
         return $this->entity->save();
     }
 

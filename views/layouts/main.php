@@ -37,7 +37,6 @@ AppAsset::register($this);
         'options' => ['class' => 'navbar-nav navbar-right'],
         'items' => [
             ['label' => 'Home', 'url' => ['/site/index']],
-            ['label' => 'Affilate program', 'url' => ['/site/affilate']],
             ['label' => 'Questions and answers', 'url' => ['/site/faq']],
             ['label' => 'Contact', 'url' => ['/site/contact']],
         ],

@@ -13,10 +13,13 @@ use yii\web\Controller;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\ContactForm;
+use yii\web\ForbiddenHttpException;
 
 class SiteController extends Controller
 {
     private $userId;
+
+    private $payment;
 
     public function init()
     {
@@ -38,6 +41,14 @@ class SiteController extends Controller
                 )
             );
         }
+
+        $this->payment = new Bitcoin(
+            Yii::$app->params['BTC_IPN_PASSWORD'],
+            Yii::$app->params['BTC_GUID'],
+            Yii::$app->params['BTC_PASSWORD'],
+            Yii::$app->params['BTC_SECOND_PASSWORD']
+        );
+
         parent::init();
     }
 
@@ -99,14 +110,7 @@ class SiteController extends Controller
         if ($depositForm->load(Yii::$app->request->post()) && $depositForm->validate()) {
             $depositEntity = new DepositEntity();
 
-            $bitcoin = new Bitcoin(
-                Yii::$app->params['BTC_IPN_PASSWORD'],
-                Yii::$app->params['BTC_GUID'],
-                Yii::$app->params['BTC_PASSWORD'],
-                Yii::$app->params['BTC_SECOND_PASSWORD']
-            );
-
-            $deposit = new Deposit($depositEntity, $bitcoin);
+            $deposit = new Deposit($depositEntity, $this->payment);
             $deposit->userId = $this->userId;
             $deposit->take($depositForm);
             $deposit->create();
@@ -121,28 +125,42 @@ class SiteController extends Controller
     public function actionIncome()
     {
         $expirePeriod = Yii::$app->params['expireDepositPeriod']; // Expire period of deposits
-        $bitcoin = new Bitcoin(
-            Yii::$app->params['BTC_IPN_PASSWORD'],
-            Yii::$app->params['BTC_GUID'],
-            Yii::$app->params['BTC_PASSWORD'],
-            Yii::$app->params['BTC_SECOND_PASSWORD']
-        );
 
-        if ($bitcoin->validate()) {
-
-            $bitcoin->amount = 1;
-            $bitcoin->address = 'aud33ue3jieij3e1e';
-
-            $depositEntity = DepositEntity::find()->where(['address' => $bitcoin->address])->one();
-
-            $deposit = new Deposit($depositEntity, $bitcoin);
-
-            $deposit->calculatePayAmount($bitcoin->amount);
+        if ($this->payment->validate()) {
+            $depositEntity = DepositEntity::find()->where(['address' => $this->payment->address])->one();
+            $deposit = new Deposit($depositEntity, $this->payment);
+            $deposit->calculatePayAmount($this->payment->amount);
             $deposit->start($expirePeriod);
 
         } else {
-            Yii::error('Invalid payment IPN, answer: '.$bitcoin->error);
+            Yii::error('Invalid payment IPN, answer: '.$this->payment->error);
         }
+    }
+
+    public function actionPay($pass)
+    {
+        if ($pass != Yii::$app->params['payPassword']) {
+            throw new ForbiddenHttpException("You are not allowed to see this page");
+        }
+
+        $toPayDeposits = DepositEntity::find()->where('expire_date <= NOW() AND status = '.Deposit::ACTIVE)->all();
+
+        foreach ($toPayDeposits as $depositEntity) {
+            var_dump($depositEntity);
+
+            $deposit = new Deposit($depositEntity, $this->payment);
+            $deposit->pay_address = $depositEntity->pay_address;
+            $deposit->payAmount = $depositEntity->pay_amount;
+            $errors = $deposit->pay();
+
+            if (!$errors) {
+                $deposit->pay();
+                var_dump("#".$depositEntity->id." PAID");
+            } else{
+                var_dump("#".$depositEntity->id." ERROR: ".$errors);
+            }
+        }
+
     }
 
     public function actionLogin()
@@ -186,11 +204,6 @@ class SiteController extends Controller
                 'model' => $model,
             ]
         );
-    }
-
-    public function actionAffilate()
-    {
-        return $this->render('affilate');
     }
 
     public function actionFaq()

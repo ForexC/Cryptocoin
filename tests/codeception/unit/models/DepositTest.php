@@ -91,4 +91,30 @@ class DepositTest extends TestCase
         $this->assertTrue($this->deposit->start($expirePeriod));
         $this->assertEquals(time() + 100, $this->deposit->period + time());
     }
+
+    public function testPay()
+    {
+        $bitcoinMock = $this->getMock('app\components\Bitcoin', array('send'),['','','','']);
+        $bitcoinMock->expects($this->once())->method('send')->will(
+            $this->returnValue('')
+        );
+
+        $this->deposit = new Deposit(new DepositEntity(), $bitcoinMock);
+        $this->deposit->pay_address = "28271jjnsjktest";
+        $this->deposit->payAmount = 1;
+        $this->assertEquals('', $this->deposit->pay());
+    }
+
+    public function testFinish()
+    {
+        $bitcoin = new Bitcoin(
+            Yii::$app->params['BTC_IPN_PASSWORD'],
+            Yii::$app->params['BTC_GUID'],
+            Yii::$app->params['BTC_PASSWORD'],
+            Yii::$app->params['BTC_SECOND_PASSWORD']
+        );
+
+        $this->deposit = new Deposit(new DepositEntity(), $bitcoin);
+        $this->assertTrue($this->deposit->finish());
+    }
 }
