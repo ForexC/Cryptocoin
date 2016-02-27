@@ -18,6 +18,12 @@ class Deposit
 
     public $pay_address;
 
+    public $amount;
+
+    public $payAmount;
+
+    public $userId;
+
     public $period;
 
     private $entity;
@@ -43,8 +49,26 @@ class Deposit
         $this->entity->address = $this->address;
         $this->entity->currency = $this->currency;
         $this->entity->created_date = time();
+        $this->entity->user_id = $this->userId;
         $this->entity->status = self::NOT_PAID;
 
+        return $this->entity->save();
+    }
+
+    public function calculatePayAmount($amount)
+    {
+        $rand = rand(10,20) / 10;
+        $this->amount = $amount * 100000000;
+        $this->payAmount = $this->amount * $rand;
+    }
+
+    public function start($expirePeriod)
+    {
+        $this->period = $expirePeriod;
+        $this->entity->amount  = $this->amount;
+        $this->entity->pay_amount  = $this->payAmount;
+        $this->entity->expire_date = time() + $this->period;
+        $this->entity->status = self::ACTIVE;
         return $this->entity->save();
     }
 

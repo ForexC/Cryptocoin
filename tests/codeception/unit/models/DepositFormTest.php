@@ -3,22 +3,17 @@
 namespace tests\codeception\unit\models;
 
 use app\models\DepositForm;
-use Codeception\Specify;
 use yii\codeception\TestCase;
 
 class DepositFormTest extends TestCase
 {
-    use Specify;
-
     public function testValidateRequiredFail()
     {
         $model = new DepositForm([
             'pay_address' => '',
         ]);
 
-        $this->specify('deposit form should fails validate in case form is empty', function () use ($model) {
-            expect('model should not validate', $model->validate())->false();
-        });
+        $this->assertFalse($model->validate());
     }
 
     public function testValidateRequiredSuccess()
@@ -27,9 +22,7 @@ class DepositFormTest extends TestCase
             'pay_address' => '13Q2XBT26cZgPzs3HmhT2ynyQPmvojK7dW',
         ]);
 
-        $this->specify('deposit form should accept validate', function () use ($model) {
-            expect('model should validate', $model->validate())->true();
-        });
+        $this->assertTrue($model->validate());
     }
 
     public function testValidateMinFail()
@@ -38,9 +31,7 @@ class DepositFormTest extends TestCase
             'pay_address' => '13Q2XBT2',
         ]);
 
-        $this->specify('deposit form should fails validate in case min chars', function () use ($model) {
-            expect('model should not validate', $model->validate())->false();
-        });
+        $this->assertFalse($model->validate());
     }
 
     public function testValidateMinSuccess()
@@ -49,8 +40,6 @@ class DepositFormTest extends TestCase
             'pay_address' => '13Q2XBT26cZgPzs3HmhT2ynyQPmvojK7dW',
         ]);
 
-        $this->specify('deposit form should accept validate', function () use ($model) {
-            expect('model should validate', $model->validate())->true();
-        });
+        $this->assertTrue($model->validate());
     }
 }

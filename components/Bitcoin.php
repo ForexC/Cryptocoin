@@ -14,9 +14,12 @@ class Bitcoin implements PaymentInterface
     public $address;
     public $amount;
 
-    function __construct()
+    function __construct($ipnPassword,$guid,$password,$secondPassword)
     {
-
+        $this->ipnPassword = $ipnPassword;
+        $this->guid = $guid;
+        $this->password = $password;
+        $this->secondPassword = $secondPassword;
     }
 
     public function printForm($params=[])
@@ -72,7 +75,7 @@ class Bitcoin implements PaymentInterface
 
     public function generateAddress()
     {
-        /*$label = "order-" . $this->orderId;
+        $label = "order-" . time();
         $url = "https://blockchain.info/merchant/".$this->guid."/new_address?password=".$this->password."&second_password=".$this->secondPassword."&label=$label&param=123";
         $json_data = @file_get_contents($url);
 
@@ -83,7 +86,6 @@ class Bitcoin implements PaymentInterface
         }
         else{
             throw new Exception('Error creating address: '.$json_feed->error);
-        }*/
-        return '12Q2XBT26cZgPzs3HmhT2ynyQPmvojK7tK';
+        }
     }
 }

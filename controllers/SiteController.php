@@ -7,6 +7,7 @@ use app\models\Deposit;
 use app\models\DepositEntity;
 use app\models\DepositForm;
 use Yii;
+use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -15,6 +16,31 @@ use app\models\ContactForm;
 
 class SiteController extends Controller
 {
+    private $userId;
+
+    public function init()
+    {
+        $cookies = Yii::$app->request->cookies;
+
+        $this->userId = $cookies->getValue('userId');
+
+        if (!$this->userId) {
+            $cookies = Yii::$app->response->cookies;
+            $this->userId = time();
+
+            $cookies->add(
+                new \yii\web\Cookie(
+                    [
+                        'name' => 'userId',
+                        'value' => $this->userId,
+                        'expire' => time() + 60 * 60 * 24 * 365,
+                    ]
+                )
+            );
+        }
+        parent::init();
+    }
+
     public function behaviors()
     {
         return [
@@ -51,31 +77,72 @@ class SiteController extends Controller
         ];
     }
 
-    public function actionIndex()
+    public function actionIndex($type = "")
     {
-        /* $orders = Order::find()->where(['email' => $this->user->email])->orderBy('id DESC');
-         $orders = new ActiveDataProvider(
-             [
-                 'query' => $orders,
-                 'sort' => false,
-             ]
-         );*/
+        $query = DepositEntity::find()->where(['status' => Deposit::ACTIVE]);
+        if ($type == "my") {
+            $query = DepositEntity::find()->where(['user_id' => $this->userId]);
+        }
+        if ($type == "paid") {
+            $query = DepositEntity::find()->where(['status' => Deposit::FINISHED]);
+        }
+
+        $deposits = new ActiveDataProvider(
+            [
+                'query' => $query,
+                'sort' => false,
+            ]
+        );
 
         $depositForm = new DepositForm();
 
         if ($depositForm->load(Yii::$app->request->post()) && $depositForm->validate()) {
             $depositEntity = new DepositEntity();
 
-            $bitcoin = new Bitcoin();
+            $bitcoin = new Bitcoin(
+                Yii::$app->params['BTC_IPN_PASSWORD'],
+                Yii::$app->params['BTC_GUID'],
+                Yii::$app->params['BTC_PASSWORD'],
+                Yii::$app->params['BTC_SECOND_PASSWORD']
+            );
 
             $deposit = new Deposit($depositEntity, $bitcoin);
+            $deposit->userId = $this->userId;
             $deposit->take($depositForm);
             $deposit->create();
-            Yii::$app->session->setFlash('result','Address to create deposit: '.$deposit->address);
+            Yii::$app->session->setFlash('result', 'Address to create deposit: '.$deposit->address);
+
             return $this->refresh();
         }
 
-        return $this->render('index', ['depositForm' => $depositForm]);
+        return $this->render('index', ['depositForm' => $depositForm, 'deposits' => $deposits]);
+    }
+
+    public function actionIncome()
+    {
+        $expirePeriod = Yii::$app->params['expireDepositPeriod']; // Expire period of deposits
+        $bitcoin = new Bitcoin(
+            Yii::$app->params['BTC_IPN_PASSWORD'],
+            Yii::$app->params['BTC_GUID'],
+            Yii::$app->params['BTC_PASSWORD'],
+            Yii::$app->params['BTC_SECOND_PASSWORD']
+        );
+
+        if ($bitcoin->validate()) {
+
+            $bitcoin->amount = 1;
+            $bitcoin->address = 'aud33ue3jieij3e1e';
+
+            $depositEntity = DepositEntity::find()->where(['address' => $bitcoin->address])->one();
+
+            $deposit = new Deposit($depositEntity, $bitcoin);
+
+            $deposit->calculatePayAmount($bitcoin->amount);
+            $deposit->start($expirePeriod);
+
+        } else {
+            Yii::error('Invalid payment IPN, answer: '.$bitcoin->error);
+        }
     }
 
     public function actionLogin()
