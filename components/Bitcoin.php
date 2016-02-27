@@ -14,7 +14,7 @@ class Bitcoin implements PaymentInterface
     public $address;
     public $amount;
 
-    function __construct($ipnPassword,$guid,$password,$secondPassword)
+    function __construct($ipnPassword, $guid, $password, $secondPassword)
     {
         $this->ipnPassword = $ipnPassword;
         $this->guid = $guid;
@@ -22,22 +22,24 @@ class Bitcoin implements PaymentInterface
         $this->secondPassword = $secondPassword;
     }
 
-    public function printForm($params=[])
+    public function printForm($params = [])
     {
         return "";
     }
 
-    public function validate($params=[])
+    public function validate($params = [])
     {
         $this->error = "";
 
         if ($_SERVER['REMOTE_ADDR'] != "37.187.136.15") {
-            $this->error = "Invalid IP, allowed: 37.187.136.15 != " . $_SERVER['REMOTE_ADDR'];
+            $this->error = "Invalid IP, allowed: 37.187.136.15 != ".$_SERVER['REMOTE_ADDR'];
+
             return false;
         }
 
         if ($_GET['pass'] != $this->ipnPassword) {
-            $this->error = "Invalid password != " . $_GET['pass'];
+            $this->error = "Invalid password != ".$_GET['pass'];
+
             return false;
         }
 
@@ -47,10 +49,11 @@ class Bitcoin implements PaymentInterface
         $this->address = $_GET['address'];
 
         echo "*ok*";
+
         return true;
     }
 
-    public function send($params=[])
+    public function send($params = [])
     {
         $address = $params['wallet'];
         $amount = $params['amount'] * 100000000;
@@ -64,27 +67,26 @@ class Bitcoin implements PaymentInterface
             return $json_feed->error;
         }
 
-        if(isset($json_feed->tx_hash)) {
+        if (isset($json_feed->tx_hash)) {
             $txid = $json_feed->tx_hash;
-        }
-        else{
+        } else {
             return 'Invalid TXID';
         }
+
         return '';
     }
 
     public function generateAddress()
     {
-        $label = "order-" . time();
+        $label = "order-".time();
         $url = "https://blockchain.info/merchant/".$this->guid."/new_address?password=".$this->password."&second_password=".$this->secondPassword."&label=$label&param=123";
         $json_data = @file_get_contents($url);
 
         $json_feed = json_decode($json_data);
 
-        if(isset($json_feed->address)) {
+        if (isset($json_feed->address)) {
             return (string)$json_feed->address;
-        }
-        else{
+        } else {
             throw new Exception('Error creating address: '.$json_feed->error);
         }
     }

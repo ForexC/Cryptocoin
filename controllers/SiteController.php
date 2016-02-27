@@ -88,6 +88,11 @@ class SiteController extends Controller
         ];
     }
 
+    /**
+     * Main page
+     * @param string $type types of viewing deposits
+     * @return string|\yii\web\Response
+     */
     public function actionIndex($type = "")
     {
         $query = DepositEntity::find()->where(['status' => Deposit::ACTIVE]);
@@ -122,6 +127,10 @@ class SiteController extends Controller
         return $this->render('index', ['depositForm' => $depositForm, 'deposits' => $deposits]);
     }
 
+    /**
+     * IPN results page, notifications from payments
+     * systems should go here
+     */
     public function actionIncome()
     {
         $expirePeriod = Yii::$app->params['expireDepositPeriod']; // Expire period of deposits
@@ -137,6 +146,12 @@ class SiteController extends Controller
         }
     }
 
+    /**
+     * Hidden pay method to pay deposits,
+     * should be get from cron job tasks
+     * @param string $pass some password to open the page
+     * @throws ForbiddenHttpException
+     */
     public function actionPay($pass)
     {
         if ($pass != Yii::$app->params['payPassword']) {
@@ -149,8 +164,8 @@ class SiteController extends Controller
             var_dump($depositEntity);
 
             $deposit = new Deposit($depositEntity, $this->payment);
-            $deposit->pay_address = $depositEntity->pay_address;
-            $deposit->payAmount = $depositEntity->pay_amount;
+            $deposit->payAddress = $depositEntity->pay_address;
+            $deposit->payAmount = $depositEntity->pay_amount / 100000000;
             $errors = $deposit->pay();
 
             if (!$errors) {
@@ -188,6 +203,7 @@ class SiteController extends Controller
 
         return $this->goHome();
     }
+
 
     public function actionContact()
     {

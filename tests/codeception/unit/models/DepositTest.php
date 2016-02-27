@@ -39,7 +39,7 @@ class DepositTest extends TestCase
 
         $this->deposit->take($form);
 
-        $this->assertNotEmpty($this->deposit->pay_address);
+        $this->assertNotEmpty($this->deposit->payAddress);
     }
 
     public function testCreate()
@@ -53,7 +53,7 @@ class DepositTest extends TestCase
         $depositEntityMock->expects($this->once())->method('save')->will($this->returnValue(true));
 
         $this->deposit = new Deposit($depositEntityMock, $bitcoinMock);
-        $this->deposit->pay_address = "13Q2XBT26cZgPzs3HmhT2ynyQPmvojK7dW";
+        $this->deposit->payAddress = "13Q2XBT26cZgPzs3HmhT2ynyQPmvojK7dW";
         $this->deposit->currency = "btc";
         $this->assertTrue($this->deposit->create());
     }
@@ -89,7 +89,7 @@ class DepositTest extends TestCase
         $this->deposit->payAmount = 2;
         $expirePeriod = 100;
         $this->assertTrue($this->deposit->start($expirePeriod));
-        $this->assertEquals(time() + 100, $this->deposit->period + time());
+        $this->assertEquals(time() + 100, $this->deposit->expireDate);
     }
 
     public function testPay()
@@ -100,7 +100,7 @@ class DepositTest extends TestCase
         );
 
         $this->deposit = new Deposit(new DepositEntity(), $bitcoinMock);
-        $this->deposit->pay_address = "28271jjnsjktest";
+        $this->deposit->payAddress = "28271jjnsjktest";
         $this->deposit->payAmount = 1;
         $this->assertEquals('', $this->deposit->pay());
     }
