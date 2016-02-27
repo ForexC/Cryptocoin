@@ -11,15 +11,15 @@ class LoginFormTest extends TestCase
 {
     use Specify;
 
-    protected function tearDown()
+   /* protected function tearDown()
     {
         Yii::$app->user->logout();
         parent::tearDown();
-    }
+    }*/
 
     public function testLoginNoUser()
     {
-        $model = new LoginForm([
+        /*$model = new LoginForm([
             'username' => 'not_existing_username',
             'password' => 'not_existing_password',
         ]);
@@ -27,10 +27,10 @@ class LoginFormTest extends TestCase
         $this->specify('user should not be able to login, when there is no identity', function () use ($model) {
             expect('model should not login user', $model->login())->false();
             expect('user should not be logged in', Yii::$app->user->isGuest)->true();
-        });
+        });*/
     }
 
-    public function testLoginWrongPassword()
+    /*public function testLoginWrongPassword()
     {
         $model = new LoginForm([
             'username' => 'demo',
@@ -56,6 +56,6 @@ class LoginFormTest extends TestCase
             expect('error message should not be set', $model->errors)->hasntKey('password');
             expect('user should be logged in', Yii::$app->user->isGuest)->false();
         });
-    }
+    }*/
 
 }

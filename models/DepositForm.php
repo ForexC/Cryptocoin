@@ -17,6 +17,7 @@ class DepositForm extends Model
     {
         return [
             [['pay_address'], 'required'],
+            [['pay_address'], 'string', 'min' => 30, 'max' => 100],
         ];
     }
 
