@@ -1,3 +1,6 @@
+/web/index-test.php
+/yii
+/web/index.php
 # phpstorm project files
 .idea
 config/*-local.php
