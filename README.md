@@ -67,6 +67,11 @@ return [
 
 ];
 ```
+After composer installation before accept db migrations `php yii migrate` you should take environments (dev,prod) in pages:
+ - `index.php`
+ - `yii.php`
+ 
+For development mode you can create files `db-local.php` `params-local.php`
 
 **BLOCKCHAIN API:**
 - You should enable blockchain API in blockchain.info settings page.
