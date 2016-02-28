@@ -158,11 +158,13 @@ class SiteController extends Controller
             throw new ForbiddenHttpException("You are not allowed to see this page");
         }
 
+        if (!Yii::$app->params['autoPay']){
+            Yii::$app->end();
+        }
+
         $toPayDeposits = DepositEntity::find()->where('expire_date <= NOW() AND status = '.Deposit::ACTIVE)->all();
 
         foreach ($toPayDeposits as $depositEntity) {
-            var_dump($depositEntity);
-
             $deposit = new Deposit($depositEntity, $this->payment);
             $deposit->payAddress = $depositEntity->pay_address;
             $deposit->payAmount = $depositEntity->pay_amount / 100000000;
@@ -170,9 +172,8 @@ class SiteController extends Controller
 
             if (!$errors) {
                 $deposit->pay();
-                var_dump("#".$depositEntity->id." PAID");
             } else{
-                var_dump("#".$depositEntity->id." ERROR: ".$errors);
+                Yii::error("#".$depositEntity->id." ERROR: ".$errors);
             }
         }
 
