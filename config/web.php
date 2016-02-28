@@ -43,9 +43,12 @@ $config = [
         ],
         'db' => require(__DIR__ . '/'.$dbName),
         'urlManager' => [
-            'enablePrettyUrl' => true,
-            'showScriptName' => false,
+            'enablePrettyUrl' => false,
+            'showScriptName' => true,
             'rules' => [
+                '' => 'site/index',
+                'faq' => 'site/faq',
+                'contact' => 'site/contact',
             ],
         ],
     ],
