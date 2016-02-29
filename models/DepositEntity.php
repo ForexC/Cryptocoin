@@ -32,7 +32,7 @@ class DepositEntity extends \yii\db\ActiveRecord
     {
         return [
             [['created_date','updated_date','amount','pay_amount','expire_date','user_id','status'], 'integer'],
-            [['currency','address','pay_address'], 'string', 'max' => 100]
+            [['currency','address','pay_address','txid'], 'string', 'max' => 100]
         ];
     }
 
@@ -52,6 +52,7 @@ class DepositEntity extends \yii\db\ActiveRecord
             'amount' => 'Amount',
             'pay_amount' => 'Pay amount',
             'status' => 'Status',
+            'txid' => 'TXID',
         ];
     }
 

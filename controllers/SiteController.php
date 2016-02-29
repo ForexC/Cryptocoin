@@ -124,7 +124,7 @@ class SiteController extends Controller
             return $this->refresh();
         }
 
-        return $this->render('index', ['depositForm' => $depositForm, 'deposits' => $deposits]);
+        return $this->render('index', ['depositForm' => $depositForm, 'deposits' => $deposits, 'type' => $type]);
     }
 
     /**
@@ -158,7 +158,7 @@ class SiteController extends Controller
             throw new ForbiddenHttpException("You are not allowed to see this page");
         }
 
-        if (!Yii::$app->params['autoPay']){
+        if (!Yii::$app->params['autoPay']) {
             Yii::$app->end();
         }
 
@@ -172,7 +172,7 @@ class SiteController extends Controller
 
             if (!$errors) {
                 $deposit->pay();
-            } else{
+            } else {
                 Yii::error("#".$depositEntity->id." ERROR: ".$errors);
             }
         }
