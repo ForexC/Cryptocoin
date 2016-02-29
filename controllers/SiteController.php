@@ -7,6 +7,7 @@ use app\models\AffiliateForm;
 use app\models\Deposit;
 use app\models\DepositEntity;
 use app\models\DepositForm;
+use app\models\PayEntity;
 use app\models\UserEntity;
 use Yii;
 use yii\data\ActiveDataProvider;
@@ -46,6 +47,11 @@ class SiteController extends Controller
             );
 
             $user = new UserEntity();
+
+            if(Yii::$app->request->get('ref')){
+                $user->ref_id = Yii::$app->request->get('ref');
+            }
+
             $user->user_id = $this->userId;
             $user->created_date = time();
             $user->save();
@@ -172,6 +178,7 @@ class SiteController extends Controller
             $deposit = new Deposit($depositEntity, $this->payment);
             $deposit->calculatePayAmount($this->payment->amount);
             $deposit->start($expirePeriod);
+            $deposit->payToPartner(new PayEntity(),Yii::$app->params['partnerPercent'],$this->user);
 
         } else {
             Yii::error('Invalid payment IPN, answer: '.$this->payment->error);
@@ -211,7 +218,6 @@ class SiteController extends Controller
 
     }
 
-
     public function actionLogin()
     {
         if (!\Yii::$app->user->isGuest) {
@@ -237,7 +243,6 @@ class SiteController extends Controller
 
         return $this->goHome();
     }
-
 
     public function actionContact()
     {
@@ -273,12 +278,18 @@ class SiteController extends Controller
             return $this->refresh();
         }
 
+        $pays = new ActiveDataProvider(
+            [
+                'query' => PayEntity::find()->where(['user_id' => $this->user->user_id]),
+                'sort' => false,
+            ]
+        );
+
         return $this->render(
             'affiliate',
-            ['userId' => $this->userId, 'user' => $this->user, 'affiliateForm' => $affiliateForm]
+            ['userId' => $this->userId, 'user' => $this->user, 'affiliateForm' => $affiliateForm, 'pays' => $pays]
         );
     }
-
 
     private function saveAddress($address)
     {

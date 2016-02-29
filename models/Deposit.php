@@ -3,6 +3,7 @@
 namespace app\models;
 
 use app\components\PaymentInterface;
+use yii\base\ErrorException;
 
 class Deposit
 {
@@ -114,5 +115,22 @@ class Deposit
         return $this->entity->save();
     }
 
+    public function payToPartner($payEntity,$percent,$user)
+    {
+        $amountToPay = (($percent * $this->entity->amount) / 100 ) / 100000000;
+
+        $partner = UserEntity::find()->where(['user_id' => $user->ref_id])->one();
+
+        if($partner) {
+            $payEntity->user_id = $user->ref_id;
+            $payEntity->address = $partner->address;
+            $payEntity->created_date = time();
+            $errors = $this->payment->send(['wallet' => $payEntity->address, 'amount' => $amountToPay]);
+
+            if($errors){
+                throw new ErrorException("Error of payment: ".$errors);
+            }
+        }
+    }
 
 }

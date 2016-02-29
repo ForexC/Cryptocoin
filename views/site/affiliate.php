@@ -24,13 +24,46 @@ $this->params['breadcrumbs'][] = 'Affiliate program';
 
     <?php $form = ActiveForm::begin(['id' => 'affiliate-form']); ?>
 
-    <?= $form->field($affiliateForm, 'address')->textInput(['autofocus' => true , 'placeholder'=>'Enter new payout address']) ?>
+    <?= $form->field($affiliateForm, 'address')->textInput(['placeholder' => 'Enter new payout address']) ?>
 
     <div class="form-group">
         <?= Html::submitButton('Save', ['class' => 'btn btn-primary', 'name' => 'affiliate-button']) ?>
     </div>
 
     <?php ActiveForm::end(); ?>
+
+    <?php
+    echo \yii\grid\GridView::widget(
+        [
+            'tableOptions' => ['class' => 'table'],
+            'summary' => '',
+            'dataProvider' => $pays,
+            'showFooter' => false,
+            'columns' => [
+                'date' => [
+                    'label' => 'Date (UTC)',
+                    'format' => 'raw',
+                    'value' => function ($data) {
+                        return date("d.m.Y H:i:s", $data->created_date);
+                    },
+                ],
+                'amount' => [
+                    'label' => 'Paid',
+                    'format' => 'raw',
+                    'value' => function ($data) {
+                        return ($data->amount / 100000000)." BTC";
+                    },
+                ],
+                'address' => [
+                    'label' => 'Address',
+                    'format' => 'raw',
+                    'value' => function ($data) {
+                        return $data->address;
+                    },
+                ],
+            ],
+        ]
+    ); ?>
 
     </p>
 
