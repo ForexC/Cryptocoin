@@ -1,3 +1,5 @@
+/config/console.php
+/config/db.php
 /web/index-test.php
 /yii
 /web/index.php
