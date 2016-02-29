@@ -116,8 +116,15 @@ class SiteController extends Controller
 
         $depositForm = new DepositForm();
 
+        $userAddress = $this->getAddress();
+        if($userAddress){
+            $depositForm->pay_address = $userAddress;
+        }
+
         if ($depositForm->load(Yii::$app->request->post()) && $depositForm->validate()) {
             $depositEntity = new DepositEntity();
+
+            $this->saveAddress($depositForm->pay_address);
 
             $deposit = new Deposit($depositEntity, $this->payment);
             $deposit->userId = $this->userId;
@@ -128,14 +135,17 @@ class SiteController extends Controller
             return $this->refresh();
         }
 
-        return $this->render('index', [
-            'depositForm' => $depositForm,
-            'deposits' => $deposits,
-            'type' => $type,
-            'activeCount' => $activeCount,
-            'myCount' => $myCount,
-            'payoutsCount' => $payoutsCount,
-        ]);
+        return $this->render(
+            'index',
+            [
+                'depositForm' => $depositForm,
+                'deposits' => $deposits,
+                'type' => $type,
+                'activeCount' => $activeCount,
+                'myCount' => $myCount,
+                'payoutsCount' => $payoutsCount,
+            ]
+        );
     }
 
     /**
@@ -238,4 +248,31 @@ class SiteController extends Controller
     {
         return $this->render('faq');
     }
+
+    private function saveAddress($address)
+    {
+        $cookies = Yii::$app->response->cookies;
+
+        $cookies->add(
+            new \yii\web\Cookie(
+                [
+                    'name' => 'address',
+                    'value' => $address,
+                    'expire' => time() + 60 * 60 * 24 * 365,
+                ]
+            )
+        );
+
+    }
+
+    private function getAddress()
+    {
+        $cookies = Yii::$app->request->cookies;
+        $address = $cookies->getValue('address');
+        if($address){
+            return $address;
+        }
+        return '';
+    }
+
 }

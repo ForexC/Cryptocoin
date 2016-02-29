@@ -13,6 +13,7 @@ class Bitcoin implements PaymentInterface
     public $error;
     public $address;
     public $amount;
+    public $txid;
 
     function __construct($ipnPassword, $guid, $password, $secondPassword)
     {
@@ -68,7 +69,7 @@ class Bitcoin implements PaymentInterface
         }
 
         if (isset($json_feed->tx_hash)) {
-            $txid = $json_feed->tx_hash;
+            $this->txid = $json_feed->tx_hash;
         } else {
             return 'Invalid TXID';
         }

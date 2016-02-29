@@ -109,6 +109,7 @@ class Deposit
     {
         $this->entity->updated_date = time();
         $this->entity->status = self::FINISHED;
+        $this->entity->txid = $this->payment->txid;
 
         return $this->entity->save();
     }
