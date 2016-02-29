@@ -178,7 +178,10 @@ $this->title = 'Cryptocoin online';
                                     'label' => 'Withdraw date',
                                     'format' => 'raw',
                                     'value' => function ($data) {
-                                        return date("d.m.Y H:i:s", $data->expire_date);
+                                        if($data->expire_date) {
+                                            return date("d.m.Y H:i:s", $data->expire_date);
+                                        }
+                                        return '';
                                     },
                                 ],
                                 'pay_amount' => [
