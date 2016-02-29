@@ -95,6 +95,10 @@ class SiteController extends Controller
      */
     public function actionIndex($type = "")
     {
+        $activeCount = DepositEntity::find()->where(['status' => Deposit::ACTIVE])->count();
+        $myCount = DepositEntity::find()->where(['user_id' => $this->userId])->count();
+        $payoutsCount = DepositEntity::find()->where(['status' => Deposit::FINISHED])->count();
+
         $query = DepositEntity::find()->where(['status' => Deposit::ACTIVE]);
         if ($type == "my") {
             $query = DepositEntity::find()->where(['user_id' => $this->userId]);
@@ -124,7 +128,14 @@ class SiteController extends Controller
             return $this->refresh();
         }
 
-        return $this->render('index', ['depositForm' => $depositForm, 'deposits' => $deposits, 'type' => $type]);
+        return $this->render('index', [
+            'depositForm' => $depositForm,
+            'deposits' => $deposits,
+            'type' => $type,
+            'activeCount' => $activeCount,
+            'myCount' => $myCount,
+            'payoutsCount' => $payoutsCount,
+        ]);
     }
 
     /**

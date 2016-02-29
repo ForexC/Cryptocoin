@@ -8,6 +8,9 @@ use yii\helpers\Url;
 /* @var $depositForm DepositForm */
 /* @var $deposits ActiveDataProvider */
 /* @var $type string */
+/* @var $activeCount integer */
+/* @var $myCount integer */
+/* @var $payoutsCount integer */
 
 $this->title = 'Cryptocoin online';
 ?>
@@ -71,9 +74,9 @@ $this->title = 'Cryptocoin online';
             </div>
 
             <div class="col-lg-10">
-                <a href="<?= Url::to(['site/index']) ?>">All investments</a> | <a
-                    href="<?= Url::to(['site/index', 'type' => 'my']) ?>">My investments</a> | <a
-                    href="<?= Url::to(['site/index', 'type' => 'paid']) ?>">Payouts</a> | Current: <?= date(
+                <a href="<?= Url::to(['site/index']) ?>">All investments (<?=$activeCount?>)</a> | <a
+                    href="<?= Url::to(['site/index', 'type' => 'my']) ?>">My investments (<?=$myCount?>)</a> | <a
+                    href="<?= Url::to(['site/index', 'type' => 'paid']) ?>">Payouts (<?=$payoutsCount?>)</a> | Current: <?= date(
                     "d.m.Y H:i:s",
                     time()
                 ) ?>
