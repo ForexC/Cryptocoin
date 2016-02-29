@@ -3,9 +3,11 @@
 namespace app\controllers;
 
 use app\components\Bitcoin;
+use app\models\AffiliateForm;
 use app\models\Deposit;
 use app\models\DepositEntity;
 use app\models\DepositForm;
+use app\models\UserEntity;
 use Yii;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
@@ -18,6 +20,8 @@ use yii\web\ForbiddenHttpException;
 class SiteController extends Controller
 {
     private $userId;
+
+    private $user;
 
     private $payment;
 
@@ -40,7 +44,14 @@ class SiteController extends Controller
                     ]
                 )
             );
+
+            $user = new UserEntity();
+            $user->user_id = $this->userId;
+            $user->created_date = time();
+            $user->save();
         }
+
+        $this->user = UserEntity::find()->where(['user_id' => $this->userId])->one();
 
         $this->payment = new Bitcoin(
             Yii::$app->params['BTC_IPN_PASSWORD'],
@@ -93,7 +104,7 @@ class SiteController extends Controller
      * @param string $type types of viewing deposits
      * @return string|\yii\web\Response
      */
-    public function actionIndex($type = "")
+    public function actionIndex($type = "", $ref = 0)
     {
         $activeCount = DepositEntity::find()->where(['status' => Deposit::ACTIVE])->count();
         $myCount = DepositEntity::find()->where(['user_id' => $this->userId])->count();
@@ -117,7 +128,7 @@ class SiteController extends Controller
         $depositForm = new DepositForm();
 
         $userAddress = $this->getAddress();
-        if($userAddress){
+        if ($userAddress) {
             $depositForm->pay_address = $userAddress;
         }
 
@@ -200,6 +211,7 @@ class SiteController extends Controller
 
     }
 
+
     public function actionLogin()
     {
         if (!\Yii::$app->user->isGuest) {
@@ -249,6 +261,25 @@ class SiteController extends Controller
         return $this->render('faq');
     }
 
+    public function actionAffiliate()
+    {
+        $affiliateForm = new AffiliateForm();
+
+        if ($affiliateForm->load(Yii::$app->request->post()) && $affiliateForm->validate()) {
+            $this->user->address = $affiliateForm->address;
+            $this->user->updated_date = time();
+            $this->user->save();
+
+            return $this->refresh();
+        }
+
+        return $this->render(
+            'affiliate',
+            ['userId' => $this->userId, 'user' => $this->user, 'affiliateForm' => $affiliateForm]
+        );
+    }
+
+
     private function saveAddress($address)
     {
         $cookies = Yii::$app->response->cookies;
@@ -269,9 +300,10 @@ class SiteController extends Controller
     {
         $cookies = Yii::$app->request->cookies;
         $address = $cookies->getValue('address');
-        if($address){
+        if ($address) {
             return $address;
         }
+
         return '';
     }
 
